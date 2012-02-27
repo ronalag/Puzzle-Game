@@ -1,0 +1,19 @@
+.piece {
+  display: block;
+  background-image: url(../images/landscape.jpg);
+  width: 100px;
+  height: 100px;
+  background-repeat: no-repeat;
+}
+
+.first {
+  background-position: 0px 0px;
+}
+
+.second {
+  background-position: 0px -100px;
+}
+
+.third {
+  background-position: 0px -1100px;
+}
