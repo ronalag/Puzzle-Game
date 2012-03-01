@@ -20,6 +20,22 @@ function PuzzleGame() {
     };
     var grid;
 
+    function areValidCoordinates(i, j) {
+        return i >= 0 && i < rows && j > 0 && j < cols;
+    }
+
+    function checkHasWon() {
+        var result = true;
+        
+        for(var i = 0; result && i < rows; i++) {
+            for(var j = 0; result && j < cols; j++) {
+                result = grid[i][j].isInCorrectPosition();
+            }
+        }
+
+        return result;
+    }
+
     function piece(domObj, i, j) {
         var that = this;
         that.domObj = domObj; /* Reference to DOM object for piece*/
@@ -27,22 +43,59 @@ function PuzzleGame() {
         var correct_j = j;
         that.i = i; 
         that.j = j;
+        
+        that.isInCorrectPosition = function() {
+            return that.i == correct_i && that.j == correct_j;
+        };
 
         that.swap = function(other) {
-            var temp = new piece(that.domObj, that.i, that.j);
-            that.domObj = other.domObj;
+            var temp = {
+                html: that.domObj.innerHTML,
+                i: that.i,
+                j: that.j
+            };
+            that.domObj.innerHTML = other.domObj.innerHTML;
             that.i = other.i;
             that.j = other.j;
-            other.domObj = temp.domObj;
+            other.domObj.innerHTML = temp.html;
             other.i = temp.i;
             other.j = temp.j;
         };
-
-        that.move = function() {
-            
+        
+        that.isWhiteBox = function() {
+            return correct_i == rows - 1 && correct_j == cols - 1;
         };
-    }
 
+        function canMove() {
+            var i, j;
+            for(i = that.i - 1; i <= that.i + 1; i++) {
+                for(j = that.j - 1; j < that.j + 1; j++) {
+                    if(i != that.i && j != that.j && areValidCoordinates(i, j) && grid[i][j].isWhiteBox()) {
+                        return grid[i][j];
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        function move(whiteBox) {
+            if(whiteBox != null) {
+                /*swap(grid[that.i][that.j], whiteBox);*/
+                that.swap(whiteBox);
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        that.domObj.onclick = function() {
+            /* */
+            if(move(canMove())) {
+                checkHasWon();
+            }
+        }
+    }
     
     function createPiece(container, x_offset, y_offset) {
         var div = document.createElement("div");
@@ -96,6 +149,7 @@ function PuzzleGame() {
             table.appendChild(row);
         }
         document.getElementsByTagName("body")[0].appendChild(table);
+        alert(checkHasWon());
     }
     
     function swap(x, y) {
@@ -114,13 +168,11 @@ function PuzzleGame() {
                 if(x == rows - 1 && y == cols -1) {
                     y--;
                 }
-                swap(grid[i][j].domObj, grid[x][y].domObj);
+                /*swap(grid[i][j].domObj, grid[x][y].domObj);*/
+                grid[i][j].swap(grid[x][y]);
             }
         }
-    }
-
-    self.move = function(i, j) {
-        
+        alert(checkHasWon());
     }
 
     self.init = function() {
