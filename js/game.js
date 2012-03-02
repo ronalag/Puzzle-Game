@@ -1,27 +1,18 @@
 
-perform = function () {
-    var second = document.getElementById('second');
-    var third = document.getElementById('third');
-    var temp = second.innerHTML;
-    
-    second.innerHTML = third.innerHTML;
-    third.innerHTML = temp;
-};
-
-function PuzzleGame() {
+function PuzzleGame(rootElement, screenLocked) {
     var self = this;
-    
+    var lockScreen = screenLocked == true;
     var rows = 5;
     var cols = 5;
     var image = {
-        path: "images/landscape.jpg",
-        width: "960px",
-        height: "700px"
+        path: "images/lake-side-1.jpg",
+        width: "1024px",
+        height: "600px"
     };
     var grid;
 
     function areValidCoordinates(i, j) {
-        return i >= 0 && i < rows && j > 0 && j < cols;
+        return i >= 0 && i < rows && j >= 0 && j < cols;
     }
 
     function checkHasWon() {
@@ -33,12 +24,15 @@ function PuzzleGame() {
             }
         }
 
-        return result;
+        if(result == true) {
+            lockScreen = true;
+            alert("You Win!");        
+        }
     }
 
     function piece(domObj, i, j) {
         var that = this;
-        that.domObj = domObj; /* Reference to DOM object for piece*/
+        that.domObj = domObj; 
         var correct_i = i;
         var correct_j = j;
         that.i = i; 
@@ -51,26 +45,31 @@ function PuzzleGame() {
         that.swap = function(other) {
             var temp = {
                 html: that.domObj.innerHTML,
-                i: that.i,
-                j: that.j
+                i: correct_i,
+                j: correct_j,
+                isWhiteBox: that.isWhiteBox
             };
             that.domObj.innerHTML = other.domObj.innerHTML;
-            that.i = other.i;
-            that.j = other.j;
+            correct_i = other.correct_i;
+            correct_j = other.correct_j;
+            that.isWhiteBox = other.isWhiteBox;
             other.domObj.innerHTML = temp.html;
-            other.i = temp.i;
-            other.j = temp.j;
+            other.correct_i = temp.i;
+            other.correct_j = temp.j;
+            other.isWhiteBox = temp.isWhiteBox;
         };
         
-        that.isWhiteBox = function() {
-            return correct_i == rows - 1 && correct_j == cols - 1;
-        };
+        that.isWhiteBox = false;
+        
+        function isDiagonal(i, j) {
+            return that.i != i && that.j != j;
+        }
 
         function canMove() {
             var i, j;
             for(i = that.i - 1; i <= that.i + 1; i++) {
-                for(j = that.j - 1; j < that.j + 1; j++) {
-                    if(i != that.i && j != that.j && areValidCoordinates(i, j) && grid[i][j].isWhiteBox()) {
+                for(j = that.j - 1; j <= that.j + 1; j++) {
+                    if(!(i == that.i && j == that.j) && areValidCoordinates(i, j) && grid[i][j].isWhiteBox && !isDiagonal(i, j)) {
                         return grid[i][j];
                     }
                 }
@@ -81,7 +80,6 @@ function PuzzleGame() {
 
         function move(whiteBox) {
             if(whiteBox != null) {
-                /*swap(grid[that.i][that.j], whiteBox);*/
                 that.swap(whiteBox);
                 return true;
             } else {
@@ -90,8 +88,7 @@ function PuzzleGame() {
         };
 
         that.domObj.onclick = function() {
-            /* */
-            if(move(canMove())) {
+            if(lockScreen != true && move(canMove())) {
                 checkHasWon();
             }
         }
@@ -100,14 +97,14 @@ function PuzzleGame() {
     function createPiece(container, x_offset, y_offset) {
         var div = document.createElement("div");
         var img = document.createElement("img");
-        img.style.width = "960px";
-        img.style.height = "700px";
+        img.style.width = image.width;
+        img.style.height = image.height;
         img.setAttribute("src", image.path);
         img.style.position = "relative";
         img.style.top = "" + x_offset;
         img.style.left = "" + y_offset;
-        div.style.height = "140px";
-        div.style.width = "192px";
+        div.style.height = "113px";
+        div.style.width = "205px";
         div.style.overflow= "hidden";   
         div.appendChild(img);
         container.appendChild(div);
@@ -130,13 +127,14 @@ function PuzzleGame() {
         table.style.border = "1px solid #000000";
         
         var td;
-        var horOffset = 192;
-        var verOffset = 140;
+        var horOffset = 204.4;
+        var verOffset = 120;
 
         for(var i = 0, x=0, y=0; i < rows; i++, x -= verOffset) {
             row = document.createElement("tr");
             for(var j = 0; j < cols; j++, y -= horOffset) {
                 td = document.createElement("td");
+                td.style.border = "1px solid #000";
                 if(i == rows - 1 && j == cols - 1) {
                     td.innerHTML = "&nbsp;";
                 } else {
@@ -148,8 +146,8 @@ function PuzzleGame() {
             y=0; 
             table.appendChild(row);
         }
-        document.getElementsByTagName("body")[0].appendChild(table);
-        alert(checkHasWon());
+        grid[rows-1][cols-1].isWhiteBox = true;
+        rootElement.appendChild(table);
     }
     
     function swap(x, y) {
@@ -168,24 +166,21 @@ function PuzzleGame() {
                 if(x == rows - 1 && y == cols -1) {
                     y--;
                 }
-                /*swap(grid[i][j].domObj, grid[x][y].domObj);*/
                 grid[i][j].swap(grid[x][y]);
             }
         }
-        alert(checkHasWon());
     }
 
     self.init = function() {
         createGrid();
         createTable();
-        randomize();
+        if(lockScreen != true) {
+            randomize();
+        }
     };
-
+    
     (function () {
         self.init();
     })();
 }
 
-window.onload = function() {
-    var game = new PuzzleGame();
-};

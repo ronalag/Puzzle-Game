@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets"
+    xmlns:rim="http://www.blackberry.com/ns/widgets"
+    version="2.0.0.0">
+    
+    <name>Tile Puzzle</name>
+    <icon src="images/icon.png" />
+    <author>Henry Aghaulor</author>
+    <description>A Tile Puzzle Game</description>
+    <rim:orientation mode="landscape"/>
+    <rim:category name="games"/> 
+    <rim:permissions>
+         <rim:permit>access_shared</rim:permit>
+    </rim:permissions>
+    <icon src="icons/example.png"/>
+    <content src="index.html"/>
+    <feature id="blackberry.app"/>
+</widget>
